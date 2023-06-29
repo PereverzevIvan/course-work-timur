@@ -6,26 +6,15 @@ from django.contrib import admin
 import os
 from django.utils.safestring import mark_safe
 
-def get_photo_path_fir_article(instance, filename):
-        ext = filename.split('.')[-1]
-        now = datetime.now()
-
-        return f"images/articles/{now.strftime('%Y')}/{now.strftime('%m')}/{now.strftime('%d')}/Article_{instance.id}.{ext}"
-
-
-def get_photo_path_fir_advertisement(instance, filename):
-        ext = filename.split('.')[-1]
-        now = datetime.now()
-
-        return f"images/advertisements/{now.strftime('%Y')}/{now.strftime('%m')}/{now.strftime('%d')}/Advertisement_{instance.id}.{ext}"
-        
-
-# Create your models here.
+# Model classes
 class Article(models.Model):
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     text = models.TextField(verbose_name='Содержание')
-    image = models.ImageField(null=True, blank=True, upload_to=get_photo_path_fir_article, verbose_name='Изображение')
+    image = models.ImageField(null=True, blank=True, upload_to='images/articles/%Y/%m/%d', verbose_name='Изображение')
     created_at = models.DateField(blank=True, null=True, auto_now_add=True, verbose_name='Дата написания')
+
+    def __str__(self):
+        return f'Статья №{self.id}'
 
     class Meta:
         verbose_name = "Статью"
@@ -38,6 +27,9 @@ class Comment(models.Model):
     text = models.TextField(verbose_name='Содержание')
     created_at = models.DateField(null=True, auto_now_add=True, verbose_name='Дата написания')
 
+    def __str__(self):
+        return f'Комментарий №{self.id} к статье №{self.article_id}'
+
     class Meta:
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии к статьям"
@@ -45,11 +37,15 @@ class Comment(models.Model):
 
 class Advertisement(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор')
-    image = models.ImageField(null=True, blank=True, upload_to=get_photo_path_fir_advertisement, verbose_name='Изображение')
+    image = models.ImageField(upload_to='images/advertisements/%Y/%m/%d', verbose_name='Изображение')
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     text = models.TextField(verbose_name='Описание')
     price = models.IntegerField(verbose_name='Цена')
     is_close = models.BooleanField(default=False, verbose_name='Закрыто')
+    created_at = models.DateField(null=True, auto_now_add=True, verbose_name='Дата написания')
+
+    def __str__(self):
+        return f'Объявление №{self.id}'
 
     class Meta:
         verbose_name = "Объявление"
@@ -65,27 +61,109 @@ class Car(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Владелец')
     advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE, verbose_name='Объявление')
 
+    def __str__(self):
+        return f'Автомобиль №{self.id} из объявления №{self.advertisement_id}'
+
     class Meta:
         verbose_name = "Автомобиль"
         verbose_name_plural = "Автомобили"
 
 
 class Rating(models.Model):
-     evaluating = models.ForeignKey(User, on_delete=models.CASCADE, related_name='evaluating', verbose_name='Оценивающий')
-     evaluated = models.ForeignKey(User, on_delete=models.CASCADE, related_name='evaluated', verbose_name='Оцениваемый')
-     value = models.IntegerField(verbose_name='Оценка')
+    evaluating = models.ForeignKey(User, on_delete=models.CASCADE, related_name='evaluating', verbose_name='Оценивающий')
+    evaluated = models.ForeignKey(User, on_delete=models.CASCADE, related_name='evaluated', verbose_name='Оцениваемый')
+    value = models.IntegerField(verbose_name='Оценка')
 
-     class Meta:
-        verbose_name = "Оценку"
-        verbose_name_plural = "Оценки авторов объявлений"
+    class Meta:
+       verbose_name = "Оценку"
+       verbose_name_plural = "Оценки авторов объявлений"
 
 
 class Сommunication(models.Model):
-     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sender', verbose_name='Отправитель')
-     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipient', verbose_name='Получатель')
-     text = models.TextField(verbose_name='Содержание')
-     created_at = models.DateField(null=True, auto_now_add=True, verbose_name='Дата написания')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sender', verbose_name='Отправитель')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipient', verbose_name='Получатель')
+    text = models.TextField(verbose_name='Содержание')
+    created_at = models.DateField(null=True, auto_now_add=True, verbose_name='Дата написания')
 
-     class Meta:
-        verbose_name = "Сообщение"
-        verbose_name_plural = "Общение"
+    def __str__(self):
+        return f'Сообщение пользователя №{self.sender_id} для пользователя №{self.recipient_id}'
+    class Meta:
+       verbose_name = "Сообщение"
+       verbose_name_plural = "Общение"
+
+
+# Inlines classes
+class CommentInlines(admin.TabularInline):
+    model = Comment
+    fields = ['author', 'text']
+
+
+# Admin classes
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'created_at', 'get_image')
+    list_display_links = ('id', 'title')
+    search_fields = ['title']
+    readonly_fields = ['created_at']
+    list_filter = ['created_at']
+    date_hierarchy = "created_at"
+
+    inlines = [CommentInlines]
+    
+    def get_image(self, object):
+        return mark_safe(f'<img src="/static/{object.image}" width=70>')
+    
+    get_image.short_description = 'Изображение'
+
+
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'author', 'article', 'created_at')
+    list_display_links = ('id', 'author')
+    search_fields = ['author__username', 'article__title']
+    readonly_fields = ['created_at']
+    list_filter = ['created_at']
+    date_hierarchy = "created_at"
+
+
+class AdvertisementAdmin(admin.ModelAdmin):
+    list_display = ('id', 'author', 'price', 'is_close', 'created_at', 'get_image')
+    list_display_links = ('id', 'author')
+    search_fields = ['title', 'author__username']
+    readonly_fields = ['created_at']
+    list_filter = ['is_close', 'created_at']
+    date_hierarchy = "created_at"
+
+    def get_image(self, object):
+        return mark_safe(f'<img src="/static/{object.image}" width=70>')
+    
+    get_image.short_description = 'Изображение'
+
+
+class CarAdmin(admin.ModelAdmin):
+    list_display = ('id', 'owner', 'advertisement', 'vin_number')
+    list_display_links = ('id', 'owner')
+    search_fields = ['advertisement__title', 'owner__username']
+
+
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_info', 'value')
+    list_display_links = ('id', 'get_info')
+    search_fields = ['advertisement__title', 'owner__username']
+    list_filter = ['value']
+
+    def get_info(self, object):
+        return f'Пользователь {object.evaluating.username} оценил пользователя {object.evaluated.username}'
+    
+    get_info.short_description = 'Информация'
+
+
+class СommunicationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_info', 'created_at')
+    list_display_links = ('id', 'get_info')
+    search_fields = ['sender__username', 'recipient__username']
+    list_filter = ['created_at']
+    readonly_fields = ['created_at']
+
+    def get_info(self, object):
+        return f'Пользователь {object.sender.username} написал пользователю {object.recipient.username}'
+    
+    get_info.short_description = 'Информация'
