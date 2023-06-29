@@ -1,21 +1,31 @@
+from datetime import datetime
 import random
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
-from os import sep
+import os
 from django.utils.safestring import mark_safe
 
-def photo_path():
-        chars= 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
-        file_name = ''.join((random.choice(chars)) for x in range(30))
-        return file_name
+def get_photo_path_fir_article(instance, filename):
+        ext = filename.split('.')[-1]
+        now = datetime.now()
+
+        return f"images/articles/{now.strftime('%Y')}/{now.strftime('%m')}/{now.strftime('%d')}/Article_{instance.id}.{ext}"
+
+
+def get_photo_path_fir_advertisement(instance, filename):
+        ext = filename.split('.')[-1]
+        now = datetime.now()
+
+        return f"images/advertisements/{now.strftime('%Y')}/{now.strftime('%m')}/{now.strftime('%d')}/Advertisement_{instance.id}.{ext}"
+        
 
 # Create your models here.
 class Article(models.Model):
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     text = models.TextField(verbose_name='Содержание')
-    image = models.ImageField(upload_to=f'images/articles/%Y/%m/%d/{photo_path()}.jpg', verbose_name='Изображение')
-    created_at = models.DateField(null=True, auto_now_add=True, verbose_name='Дата написания')
+    image = models.ImageField(null=True, blank=True, upload_to=get_photo_path_fir_article, verbose_name='Изображение')
+    created_at = models.DateField(blank=True, null=True, auto_now_add=True, verbose_name='Дата написания')
 
     class Meta:
         verbose_name = "Статью"
@@ -35,7 +45,7 @@ class Comment(models.Model):
 
 class Advertisement(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор')
-    image = models.ImageField(upload_to=f'images/advertisements/%Y/%m/%d/{photo_path()}.jpg', verbose_name='Изображение')
+    image = models.ImageField(null=True, blank=True, upload_to=get_photo_path_fir_advertisement, verbose_name='Изображение')
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     text = models.TextField(verbose_name='Описание')
     price = models.IntegerField(verbose_name='Цена')
