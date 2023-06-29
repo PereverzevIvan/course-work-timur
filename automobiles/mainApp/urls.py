@@ -5,3 +5,5 @@ app_name = 'mainApp'
 urlpatterns = [
     path('', index, name='index'),
 ]
+
+handler404 = 'mainApp.views.error_404'
