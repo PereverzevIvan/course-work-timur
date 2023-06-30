@@ -83,10 +83,12 @@ class Сommunication(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sender', verbose_name='Отправитель')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipient', verbose_name='Получатель')
     text = models.TextField(verbose_name='Содержание')
-    created_at = models.DateField(null=True, auto_now_add=True, verbose_name='Дата написания')
+    created_date = models.DateField(null=True, auto_now_add=True, verbose_name='Дата написания')
+    created_time = models.TimeField(auto_now_add=True, null=True, verbose_name='Время написания')
 
     def __str__(self):
         return f'Сообщение пользователя №{self.sender_id} для пользователя №{self.recipient_id}'
+    
     class Meta:
        verbose_name = "Сообщение"
        verbose_name_plural = "Общение"
@@ -157,11 +159,11 @@ class RatingAdmin(admin.ModelAdmin):
 
 
 class СommunicationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_info', 'created_at')
+    list_display = ('id', 'get_info', 'created_date', 'created_time')
     list_display_links = ('id', 'get_info')
     search_fields = ['sender__username', 'recipient__username']
-    list_filter = ['created_at']
-    readonly_fields = ['created_at']
+    list_filter = ['created_date']
+    readonly_fields = ['created_date', 'created_time']
 
     def get_info(self, object):
         return f'Пользователь {object.sender.username} написал пользователю {object.recipient.username}'

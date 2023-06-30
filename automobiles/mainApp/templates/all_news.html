@@ -1,7 +1,13 @@
 {% extends "base.html" %}
-{% block document_title %}Главная{% endblock document_title %}
+{% block document_title %}Новости{% endblock document_title %}
 {% block additional_styles %}
     <style>
+        .news-container {
+            display: grid;
+            grid-template: auto / repeat(3, 1fr);
+            gap: 20px;
+        }
+
         .article {
             margin: 10px auto 0;
             border: 1px solid black;
@@ -9,7 +15,6 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-width: 60%;
         }
         .article__title {
             font-weight: Bold;
@@ -32,18 +37,19 @@
 {% block content %}
     {% load static %}
     <h1>Новости</h1>
-    {% if news %}
-    {% for article in news %}
-    <div class="article">
-        {% if article.image %}
-            <img class="" src="{% static article.image %}" alt="">
+    <div class="news-container">
+        {% if news %}
+        {% for article in news %}
+        <div class="article">
+            {% if article.image %}
+                <img class="" src="{% static article.image %}" alt="">
+            {% endif %}
+            <a href="{% url 'mainApp:one_article' article.id %}" class="article__title common-text">{{ article.title }}</a>
+            <p class="article__date common-text">{{ article.created_at }}</p>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="common-text">Простите, статьи не найдены</p>
         {% endif %}
-        <a href="{% url 'mainApp:one_article' article.id %}" class="article__title common-text">{{ article.title }}</a>
-        <p class="article__text common-text">{{ article.text }}</p>
-        <p class="article__date common-text">{{ article.created_at }}</p>
     </div>
-    {% endfor %}
-    {% else %}
-    <p class="common-text">Простите, статьи не найдены</p>
-    {% endif %}
 {% endblock content %}

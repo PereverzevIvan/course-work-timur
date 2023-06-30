@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block document_title %}Главная{% endblock document_title %}
+{% block document_title %}Объявление{% endblock document_title %}
 {% block additional_styles %}
 <style>
     a {
@@ -47,11 +47,11 @@
             <div class="">
                 <p class="common-text">Автор объявления: <a href="{% url 'mainApp:author_profile' advertisement.author.id %}">{{ advertisement.author }}</a></p>
                 <p class="common-text">Контакт автора: {{ advertisement.author.email }}</p>
-                <p class="common-text">Рейтинг автора: </p>
+                <p class="common-text">Рейтинг автора: {{ author_rating }}</p>
             </div>
             {% if user.is_authenticated %}
             {% if user.id != advertisement.author.id %}
-            <a href="" class="btn">Начать переписку</a>
+            <a href="{% url 'mainApp:chat' advertisement.author.id %}" class="btn">Начать переписку</a>
             {% else %}
             <a href="" class="btn">Закрыть объявление</a>
             <a href="{% url 'mainApp:delete_advertisement' advertisement.id %}" class="btn">Удалить объявление</a>

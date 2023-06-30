@@ -12,7 +12,10 @@ urlpatterns = [
     path('one_advertisement/<int:advertisement_id>', show_one_advertisement, name='one_advertisement'),
     path('add_advertisement/', add_advertisement, name='add_advertisement'),
     path('delete_advertisement/<int:advertisement_id>/', delete_advertisement, name='delete_advertisement'),
-    path('author_profile/<int:user_id>', show_author_profile, name='author_profile')
+    path('author_profile/<int:user_id>', show_author_profile, name='author_profile'),
+    path('chat/<int:user_id>/', to_chat, name='chat'),
+    path('send_message/<int:user_id>', send_message, name='send_message'),
+    path('set_rating', set_rating, name='set_rating')
 ]
 
 handler404 = 'mainApp.views.error_404'

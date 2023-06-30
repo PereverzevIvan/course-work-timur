@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, HttpResponsePermanentRedirect
 from django.urls import reverse
 from .models import *
+from django.http import JsonResponse
+import json
 
 # Create your views here.
 def index(request):
@@ -57,8 +59,10 @@ def show_all_advertisements(request):
 def show_one_advertisement(request, advertisement_id):
     advertisement = get_object_or_404(Advertisement, pk=advertisement_id)
     car = get_object_or_404(Car, advertisement_id=advertisement_id)
+    author_rating = 0 + sum([record.value for record in Rating.objects.filter(evaluated_id=advertisement.author.id)])
+    
 
-    return render(request, 'one_advertisement.html', {'advertisement': advertisement, 'car': car})
+    return render(request, 'one_advertisement.html', {'advertisement': advertisement, 'car': car, 'author_rating': author_rating})
 
 def add_advertisement(request):
     if request.method == 'GET':
@@ -112,8 +116,75 @@ def delete_advertisement(request, advertisement_id:int):
                                                     'error_text': 'Вы не можете удалить объявление другого человека'})
 
 def show_author_profile(request, user_id:int):
+    user = request.user
+
     author = get_object_or_404(User, pk=user_id)
     advertisements = list(Advertisement.objects.filter(author_id=user_id))[::-1]
+    messages = []
+    author_rating = 0 + sum([record.value for record in Rating.objects.filter(evaluated_id=author.id)])
+    was_evaluated = ''
+
+    context = {'author': author, 
+               'advertisements': advertisements, 
+               'messages': messages, 
+               'author_rating': author_rating}
+
+    if user.is_authenticated:
+        if (user.id == author.id):
+            messages = Сommunication.objects.filter(sender_id=user.id) | Сommunication.objects.filter(recipient_id=user.id)
+            messages = sorted(messages, key=lambda x: (x.created_date, x.created_time), reverse=True)
+        was_evaluated = list(Rating.objects.filter(evaluating_id=user.id, evaluated_id=author.id))
+        if was_evaluated:
+            context['was_evaluated'] = was_evaluated[0]
+    return render(request, 'author_profile.html', context)
 
 
-    return render(request, 'author_profile.html', {'author': author, 'advertisements': advertisements})
+def to_chat(request, user_id:int):
+    sender = request.user
+    recipient = get_object_or_404(User, pk=user_id)
+    messages = list(Сommunication.objects.filter(sender_id=sender.id, recipient_id=recipient.id) | Сommunication.objects.filter(sender_id=recipient.id, recipient_id=sender.id))
+    messages = sorted(messages, key=lambda x: (x.created_date, x.created_time))
+
+    if sender.is_authenticated:
+        if sender.id != recipient.id:
+            return render(request, 'chat.html', {'sender': sender, 'recipient': recipient, 'messages': messages})
+    return render(request, 'error.html', {'error_title': 'Ошибка', 
+                                                    'error_text': 'Что-то пошло не так'})
+
+
+def send_message(request, user_id:int):
+    sender = request.user
+    recipient = get_object_or_404(User, pk=user_id)
+
+    if request.method == 'POST':
+        new_message = Сommunication()
+        new_message.sender = sender
+        new_message.recipient = recipient
+        new_message.text = request.POST.get('text')
+        new_message.save()
+    
+    return HttpResponsePermanentRedirect(reverse('mainApp:chat', kwargs={'user_id': user_id}))
+    
+
+def set_rating(request):
+    if request.method == 'GET':
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            message = 'Это сообщение от сервера! У тебя получилось!'
+            return JsonResponse({'message': message})
+    if request.method == 'POST':
+        message = ''
+        data = json.loads(request.body)
+        old_rating = Rating.objects.filter(evaluating_id=data['evaluating'], evaluated_id=data['evaluated'])
+
+        if old_rating:
+            old_rating.delete()
+            message = data['action'] + ' delete'
+        else:
+            new_rating = Rating()
+            new_rating.evaluating_id = data['evaluating']
+            new_rating.evaluated_id = data['evaluated']
+            new_rating.value = 1 if data['action'] == 'like' else -1
+            message = data['action']
+            new_rating.save()
+
+        return JsonResponse({'message': message})
