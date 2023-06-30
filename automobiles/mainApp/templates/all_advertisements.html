@@ -20,10 +20,7 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
-        justify-content: space-around;
-    }
-    .advertisement__author {
-        justify-self: flex-end;
+        justify-content: flex-start;
     }
 
     img {
@@ -56,7 +53,7 @@
         <img class="" src="{% static record.image %}" alt="">
         <div class="advertisement__desc">
             <p class="advertisement__title common-text">{{ record.title }}</p>
-            <p class="advertisement__price common-text">{{ record.price }} рублей</p>
+            <p class="advertisement__price common-text">Цена: {{ record.price }} рублей</p>
             <p class="advertisement__author common-text">Автор объявления: {{ record.author }}</p>
         </div>
     </a>

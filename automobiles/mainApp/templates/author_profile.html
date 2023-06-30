@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block document_title %}Главная{% endblock document_title %}
+{% block additional_styles %}
+<style>
+    .profile-container {
+        margin-top: 20px;
+        display: grid;
+        grid-template: 1fr 1fr / 1fr 1fr;
+        gap: 20px;
+    }
+    .advertisements, .info, .messages {
+        border: 1px solid black;
+        gap: 10px;
+        padding: 5px;
+        max-height: 500px;
+        overflow-y: scroll;
+    }
+    .list {
+        gap: 10px;
+    }
+
+    .advertisement {
+        border: 1px solid black;
+        padding: 10px;
+        display: flex;
+        gap: 10px;
+        max-width: 98%;
+    }
+    .advertisement__title {
+        font-weight: Bold;
+    }
+    .advertisement__price {
+        font-weight: Bold;
+    }
+    .advertisement__desc {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        justify-content: flex-start;
+    }
+    .advertisement__author {
+        justify-self: flex-end;
+    }
+
+    img {
+        width: 100%;
+        max-width: 30%;
+        height: 100px;
+        align-self: flex-start;
+        display: inline-block;
+        align-self: center;
+        object-fit: cover;
+    }
+</style>
+{% endblock additional_styles %}
+{% block content %}
+    {% load static %}
+
+    <h1>Профиль пользвателя {{ author }}</h1>
+    <div class="profile-container">
+        <div class="advertisements wrapper">
+            <h2>Объявления</h2>
+            <div class="list wrapper" style="align-items: center;">
+                {% if advertisements %}
+                {% for record in advertisements %}
+                <a href="{% url 'mainApp:one_advertisement' record.id %}" class="advertisement">
+                    <img class="" src="{% static record.image %}" alt="">
+                    <div class="advertisement__desc">
+                        <p class="advertisement__title common-text">{{ record.title }}</p>
+                        <p class="advertisement__price common-text">Цена: {{ record.price }} рублей</p>
+                        <p class="common-text">Статус: {% if not record.is_close %}Открыто{% else %}Закрыто{% endif %}</p>
+                    </div>
+                </a>
+                {% endfor %}
+                {% else %}
+                <p class="common-text">Объявления не найдены</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="info wrapper">
+            <h2>Общая информация</h2>
+            <div class="list wrapper">
+                <p class="common-text">Имя пользователя: {{ user }}</p>
+                <p class="common-text">Контакт пользователя: {{ user.email }}</p>
+                <p class="common-text">Рейтинг пользователя: 0</p>
+                <div class="button-box">
+                    <button class="btn">Поставить оценку "Хорошо"</button>
+                    <button class="btn">Поставить оценку "Плохо"</button>
+                </div>
+                <p class="common-text">Количество объявлений: 0</p>
+                <p class="common-text">Количество объявлений (закрытых): 0</p>
+            </div>
+        </div>
+        <div class="messages wrapper" style="grid-column: 2;">
+            <h2>Ваши последние сообщения</h2>
+        </div>
+    </div>
+{% endblock content %}

@@ -36,7 +36,7 @@
 {% block content %}
     {% load static %}
     <h1>{{ advertisement.title }}</h1>
-    <h2>Основная информация</h2>
+    <h2>Содержание</h2>
     <div class="info">
         <img src="{% static advertisement.image %}" alt="">
         <div class="flex-container wrapper">
@@ -45,12 +45,17 @@
             <p class="common-text">{{ advertisement.text }}</p>
             <h3>Об авторе</h3>
             <div class="">
-                <p class="common-text">Автор объявления: <a href="">{{ advertisement.author }}</a></p>
+                <p class="common-text">Автор объявления: <a href="{% url 'mainApp:author_profile' advertisement.author.id %}">{{ advertisement.author }}</a></p>
                 <p class="common-text">Контакт автора: {{ advertisement.author.email }}</p>
                 <p class="common-text">Рейтинг автора: </p>
             </div>
             {% if user.is_authenticated %}
+            {% if user.id != advertisement.author.id %}
             <a href="" class="btn">Начать переписку</a>
+            {% else %}
+            <a href="" class="btn">Закрыть объявление</a>
+            <a href="{% url 'mainApp:delete_advertisement' advertisement.id %}" class="btn">Удалить объявление</a>
+            {% endif %}
             {% endif %}
         </div>
     </div>

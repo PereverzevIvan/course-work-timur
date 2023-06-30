@@ -100,3 +100,20 @@ def add_advertisement(request):
         print(new_car)
 
         return render(request, 'add_advertisement.html')
+    
+def delete_advertisement(request, advertisement_id:int):
+        advertisement = get_object_or_404(Advertisement, pk=advertisement_id)
+        user = request.user
+
+        if user.is_authenticated and advertisement.author_id == user.id:
+            advertisement.delete()
+            return HttpResponsePermanentRedirect(reverse('mainApp:all_advertisements'))
+        return render(request, 'error.html', {'error_title': 'Ошибка удаления', 
+                                                    'error_text': 'Вы не можете удалить объявление другого человека'})
+
+def show_author_profile(request, user_id:int):
+    author = get_object_or_404(User, pk=user_id)
+    advertisements = list(Advertisement.objects.filter(author_id=user_id))[::-1]
+
+
+    return render(request, 'author_profile.html', {'author': author, 'advertisements': advertisements})
