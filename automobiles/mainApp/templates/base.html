@@ -16,10 +16,10 @@
             <nav class="header__nav">
                 <ul class="menu">
                     <li class="menu__item">
-                        <a class="menu__link" href="">Объявления</a>
+                        <a class="menu__link" href="{% url 'mainApp:all_advertisements' %}">Объявления</a>
                     </li>
                     <li class="menu__item">
-                        <a class="menu__link" href="{% url 'mainApp:all_news' 1 %}">Новости</a>
+                        <a class="menu__link" href="{% url 'mainApp:all_news' %}">Новости</a>
                     </li>
                     <li class="menu__item">
                         <a class="menu__link" href="/admin">Админка</a>

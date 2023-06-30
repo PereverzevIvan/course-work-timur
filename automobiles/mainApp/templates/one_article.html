@@ -5,7 +5,10 @@
         .info {
             display: flex;
             flex-direction: column;
-            min-height: 300px;
+            padding: 10px;
+        }
+        .info__text {
+            min-height: 250px;
         }
         .flex-container {
             display: flex;
@@ -17,6 +20,7 @@
             max-width: 30%;
             align-self: flex-start;
             display: inline-block;
+            object-fit: cover;
         }
 
         .comments {
@@ -55,7 +59,7 @@
     <form action="{% url 'mainApp:add_comment' article.id %}" class="form" method="post">
         {% csrf_token %}
         <label class="common-text" for="comment-text">Введите текст</label>
-        <textarea name="comment-text" id="comment-text" cols="30" rows="10"></textarea>
+        <textarea name="comment-text" id="comment-text" cols="30" rows="10" required></textarea>
         <button class="btn" type="submit" style="align-self: flex-end;">Отправить</button>
     </form>
     {% endif %}
