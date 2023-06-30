@@ -53,7 +53,6 @@
             {% if user.id != advertisement.author.id %}
             <a href="{% url 'mainApp:chat' advertisement.author.id %}" class="btn">Начать переписку</a>
             {% else %}
-            <a href="" class="btn">Закрыть объявление</a>
             <a href="{% url 'mainApp:delete_advertisement' advertisement.id %}" class="btn">Удалить объявление</a>
             {% endif %}
             {% endif %}

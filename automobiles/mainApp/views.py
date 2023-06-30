@@ -132,7 +132,7 @@ def show_author_profile(request, user_id:int):
     if user.is_authenticated:
         if (user.id == author.id):
             messages = Сommunication.objects.filter(sender_id=user.id) | Сommunication.objects.filter(recipient_id=user.id)
-            messages = sorted(messages, key=lambda x: (x.created_date, x.created_time), reverse=True)
+            context['messages'] = sorted(messages, key=lambda x: (x.created_date, x.created_time), reverse=True)
         was_evaluated = list(Rating.objects.filter(evaluating_id=user.id, evaluated_id=author.id))
         if was_evaluated:
             context['was_evaluated'] = was_evaluated[0]

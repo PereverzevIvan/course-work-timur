@@ -94,8 +94,7 @@
                     <button class="btn dislike-button">Поставить оценку "Плохо"</button>
                 </div>
                 {% endif %}
-                <p class="common-text">Количество объявлений: 0</p>
-                <p class="common-text">Количество объявлений (закрытых): 0</p>
+                <p class="common-text">Количество объявлений: {{ advertisements|length}}</p>
                 {% if user.id == author.id %}
                 <a href="{% url 'users:logout' %}" class="btn">Выйти из профиля</a>
                 {% endif %}
