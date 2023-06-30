@@ -35,7 +35,7 @@
                         </li>
                     {% else %}
                         <li class="menu__item">
-                            <a class="menu__link" href="{% url 'users:logout' %}">{{ user }}</a>
+                            <a class="menu__link" href="{% url 'mainApp:author_profile' user.id %}">{{ user }}</a>
                         </li>
                     {% endif %}
                 </ul>

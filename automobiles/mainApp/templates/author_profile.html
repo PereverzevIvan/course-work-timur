@@ -51,6 +51,10 @@
         align-self: center;
         object-fit: cover;
     }
+
+    .btn {
+        box-shadow: 0 0 5px 1px gray;
+    }
 </style>
 {% endblock additional_styles %}
 {% block content %}
@@ -80,15 +84,20 @@
         <div class="info wrapper">
             <h2>Общая информация</h2>
             <div class="list wrapper">
-                <p class="common-text">Имя пользователя: {{ user }}</p>
-                <p class="common-text">Контакт пользователя: {{ user.email }}</p>
+                <p class="common-text">Имя пользователя: {{ author }}</p>
+                <p class="common-text">Контакт пользователя: {{ author.email }}</p>
                 <p class="common-text">Рейтинг пользователя: 0</p>
+                {% if user.id != author.id %}
                 <div class="button-box">
                     <button class="btn">Поставить оценку "Хорошо"</button>
                     <button class="btn">Поставить оценку "Плохо"</button>
                 </div>
+                {% endif %}
                 <p class="common-text">Количество объявлений: 0</p>
                 <p class="common-text">Количество объявлений (закрытых): 0</p>
+                {% if user.id == author.id %}
+                <a href="{% url 'users:logout' %}" class="btn">Выйти из профиля</a>
+                {% endif %}
             </div>
         </div>
         <div class="messages wrapper" style="grid-column: 2;">
