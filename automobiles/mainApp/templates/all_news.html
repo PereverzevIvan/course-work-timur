@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block document_title %}Главная{% endblock document_title %}
+{% block additional_styles %}
+    <style>
+        .article {
+            margin: 10px auto 0;
+            border: 1px solid black;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 60%;
+        }
+        .article__title {
+            font-weight: Bold;
+            text-decoration: underline;
+        }
+        .article__date {
+            align-self: flex-end;
+        }
+    </style>
+{% endblock additional_styles %}
+{% block content %}
+    {% load static %}
+    <h1>Новости</h1>
+    {% if news %}
+    {% for article in news %}
+    <div class="article">
+        {% if artticle.image %}
+            <img class="" src="{% static article.image %}" alt="">
+        {% endif %}
+        <a href="{% url 'mainApp:one_article' article.id %}" class="article__title common-text">{{ article.title }}</a>
+        <p class="article__text common-text">{{ article.text }}</p>
+        <p class="article__date common-text">{{ article.created_at }}</p>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="common-text">Простите, статьи не найдены</p>
+    {% endif %}
+{% endblock content %}
